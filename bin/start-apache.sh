@@ -5,10 +5,10 @@ SSL_CERT_FILE="/etc/openxpki/tls/endentity/openxpki.crt"
 SSL_KEY_FILE="/etc/openxpki/tls/private/openxpki.pem"
 
 # subj for self-signed certificate
-CERT_SUBJ="/CN=OpenXPKI Test"
+CERT_SUBJ="/CN=OpenXPKI Orion PKI Server"
 # host names:
-DNS1="DNS.1 = localhost"
-DNS2="DNS.2 = openxpki"
+DNS1="DNS.1 = pki.orionet.re"
+DNS2="DNS.2 = orion-pki.mpgn.dev"
 DNS3=""
 
 # cleanup pid file for apache

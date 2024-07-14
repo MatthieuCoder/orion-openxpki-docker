@@ -6,8 +6,7 @@ function alias_for_identifier() {
   declare -n ret=$3
   ret="$(openxpkiadm alias --realm "$1" | perl -0777 -ne "\$str=\$_; print \$str =~ /Alias\s*:\s*(.*)\s*\n\s*Identifier\s*:\s*$2/ ;")"
 }
-# carries out the whole import process
-# Parameters: [1]: realm (e.g. "ca-one") [2]: path to certificate file [3]: certificate type
+
 function import_cert() {
   realm="$1"
   file="$2"
@@ -15,30 +14,17 @@ function import_cert() {
   echo "detected $type certificate for realm '$realm': $(basename "$file")"
   #expected location of keyfile
   key_file="$BASE_PATH/$realm/$(basename "$file" .crt).pem"
-  #extract optional generation parameter which is part of the file name
-  generation="$( echo "$file" | sed -rn 's/.*-([0-9]+)\.crt/\1/p')"
   # calculate identifier for certificate
   identifier="$(openxpkiadm certificate id --file "$file")"
   # check if certificate is already imported
   if openxpkicli get_cert --realm "$realm" --arg identifier="$identifier" >/dev/null 2>/dev/null; then
     echo "IGNORING $file as it is already imported"
   else
-      #import certificate with/without generation
-      if [ ! -z "$generation" ]; then
-        openxpkiadm certificate import --file "$file" --realm "$realm" --token "$type" --generation $generation
-      else
-        openxpkiadm certificate import --file "$file" --realm "$realm" --token "$type"
-      fi
-      if [ ! -f "$key_file" ]; then
-        echo "WARNING: '$realm'/$(basename "$file"): No matching key file exists"
-      else
-        #move keyfile to the right place so that it can be found by openxpki
-        alias=""
-        alias_for_identifier "$realm" "$identifier" alias
-        cp -n "$key_file" "$BASE_PATH/$realm/$alias.pem"
-      fi
+      openxpkiadm alias --realm "$realm" \
+        --file "$file" \
+        --key "$key_file" \
+        --token "$type"
   fi
-
 }
 
 function do_realm_dir() {
@@ -71,6 +57,7 @@ function do_realm_dir() {
           echo "IGNORING $(basename "$f"): No matching key file exists"
         fi
     done
+    
     #import root certificate
     for f in $(find "$realm_dir" -mindepth 1 -maxdepth 1 -type f -regextype sed -iregex "$root_regex"); do
       root_identifer="$(openxpkiadm certificate id --file "$f")"
@@ -80,11 +67,8 @@ function do_realm_dir() {
         echo "importing root"
         openxpkiadm certificate import --file "$f"
       fi
-      # add all roots to the tls chain
-      chainfile="/etc/openxpki/tls/chain/$root_identifer.crt"
-      -e $chainfile || cp $f $chainfile
     done
-    c_rehash /etc/openxpki/tls/chain/
+
     #generic import of certsign/scep tokens
     for f in $(find "$realm_dir" -mindepth 1 -maxdepth 1 -type f -regextype sed -iregex "$scep_regex"); do
       import_cert "$realm" "$f" "scep"

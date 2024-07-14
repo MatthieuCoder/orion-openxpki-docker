@@ -1,29 +1,29 @@
-version: "3"
-
 services:
   db:
-#    restart: always
-    image: mariadb:10
+    restart: always
+    image: mariadb
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - openxpkidb:/var/lib/mysql
       - openxpkidbsocket:/var/run/mysqld/
       - ./openxpki-config/contrib/sql/schema-mariadb.sql:/docker-entrypoint-initdb.d/schema-mariadb.sql
     environment:
-      MYSQL_DATABASE: openxpki
-      MYSQL_USER: openxpki
-      MYSQL_PASSWORD: openxpki 
-      MYSQL_ROOT_PASSWORD: topsecret
+      MARIADB_DATABASE: openxpki
+      MARIADB_USER: openxpki
+      MARIADB_PASSWORD: openxpki
+      MARIADB_ROOT_PASSWORD: topsecret
 
   openxpki-server:
-#    restart: always
+    restart: always
     image: whiterabbitsecurity/openxpki3
     command: /usr/bin/openxpkictl start --no-detach
     volumes:
       - ./openxpki-config:/etc/openxpki
+      - ./userdb.yaml:/userdb.yaml
       - openxpkilog:/var/log/openxpki
       - openxpkisocket:/var/openxpki/
       - openxpkidbsocket:/var/run/mysqld/
+      - ./bin/setup-cert.sh:/usr/bin/setup-cert
       # this will not work on all OS
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
@@ -31,14 +31,16 @@ services:
         - db
 
   openxpki-client:
-#    restart: always
+    restart: always
     image: whiterabbitsecurity/openxpki3
     command: /usr/bin/start-apache
     ports:
       - "8080:80/tcp"
       - "8443:443/tcp"
     volumes:
+      - ./userdb.yaml:/userdb.yaml
       - ./openxpki-config:/etc/openxpki
+      - ./bin/setup-cert.sh:/usr/bin/setup-cert
       - openxpkilog:/var/log/openxpki
       - openxpkisocket:/var/openxpki/
       - openxpkidbsocket:/var/run/mysqld/
@@ -50,4 +52,3 @@ volumes:
   openxpkisocket:
   openxpkidbsocket:
   openxpkilog:
-

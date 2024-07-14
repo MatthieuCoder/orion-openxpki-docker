@@ -8,4 +8,3 @@ for lang in `ls /etc/openxpki/i18n/`; do
     mkdir -m755 -p /usr/share/locale/$lang/LC_MESSAGES/
     msgcat --use-first $FILES | msgfmt - -o /usr/share/locale/$lang/LC_MESSAGES/openxpki.mo
 done;
-
