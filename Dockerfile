@@ -37,6 +37,8 @@ RUN chmod +x /usr/bin/start-apache
 COPY bin/update-i18n.sh /usr/bin/update-i18n
 RUN chmod +x /usr/bin/update-i18n
 
+ENV EUID=1000 EGID=1000
+
 CMD ["/usr/bin/openxpkictl","start","--no-detach"]
 
 EXPOSE 80 443
