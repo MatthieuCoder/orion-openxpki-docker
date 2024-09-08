@@ -15,7 +15,7 @@ services:
 
   openxpki-server:
     restart: always
-    image: whiterabbitsecurity/openxpki3
+    build: .
     command: /usr/bin/openxpkictl start --no-detach
     volumes:
       - ./openxpki-config:/etc/openxpki
@@ -33,7 +33,7 @@ services:
 
   openxpki-client:
     restart: always
-    image: whiterabbitsecurity/openxpki3
+    build: .
     command: /usr/bin/start-apache
     ports:
       - "127.0.0.1:8080:80/tcp"
