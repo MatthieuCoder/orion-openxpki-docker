@@ -1,9 +1,7 @@
 services:
   db:
     restart: always
-    user: root
     image: mariadb
-    privileged: true    # <-- this one
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - ./db:/var/lib/mysql
@@ -16,8 +14,6 @@ services:
       MARIADB_ROOT_PASSWORD: topsecret
 
   openxpki-server:
-    user: root
-    privileged: true    # <-- this one
     restart: always
     image: whiterabbitsecurity/openxpki3
     command: /usr/bin/openxpkictl start --no-detach
@@ -36,8 +32,6 @@ services:
         - db
 
   openxpki-client:
-    user: root
-    privileged: true    # <-- this one
     restart: always
     image: whiterabbitsecurity/openxpki3
     command: /usr/bin/start-apache
