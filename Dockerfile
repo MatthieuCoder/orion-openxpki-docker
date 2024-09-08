@@ -43,7 +43,7 @@ COPY bin/start-apache.sh /usr/bin/start-apache
 RUN chmod 555 /usr/bin/start-apache
 COPY bin/update-i18n.sh /usr/bin/update-i18n
 RUN chmod 555 /usr/bin/update-i18n
-
+RUN chown openxpki:openxpki -R /var/log/apache2/
 USER openxpki
 
 CMD ["/usr/bin/openxpkictl","start","--no-detach"]
