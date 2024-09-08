@@ -1,1 +1,3 @@
 openxpki-config
+ca/
+userdb.yaml
