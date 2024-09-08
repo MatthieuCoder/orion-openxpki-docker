@@ -3,6 +3,9 @@ FROM debian:bookworm
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENXPKI_NOCONFIG=1
 
+RUN groupadd -g 1000 openxpki && \
+    useradd -m -u 1000 -g openxpki openxpki
+
 RUN apt-get update && \
     apt-get upgrade --assume-yes && \
     apt-get install --assume-yes gpg libdbd-mysql-perl libapache2-mod-fcgid apache2 wget locales less gettext curl
@@ -35,11 +38,13 @@ RUN ln -s /etc/openxpki/contrib/apache2-openxpki-site.conf /etc/apache2/sites-av
 RUN ln -s ../sites-available/openxpki.conf /etc/apache2/sites-enabled/ 
 RUN a2enmod cgid fcgid headers rewrite ssl
 COPY bin/setup-cert.sh /usr/bin/setup-cert
-RUN chmod +x /usr/bin/setup-cert
+ RUN chmod 555 /usr/bin/setup-cert
 COPY bin/start-apache.sh /usr/bin/start-apache
-RUN chmod +x /usr/bin/start-apache
+RUN chmod 555 /usr/bin/start-apache
 COPY bin/update-i18n.sh /usr/bin/update-i18n
-RUN chmod +x /usr/bin/update-i18n
+RUN chmod 555 /usr/bin/update-i18n
+
+USER openxpki
 
 CMD ["/usr/bin/openxpkictl","start","--no-detach"]
 
