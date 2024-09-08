@@ -2,3 +2,6 @@ packages
 openxpki-config/
 openxpki/
 Makefile.local
+db/
+userdb.yaml
+ca/

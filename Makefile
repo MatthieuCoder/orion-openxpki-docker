@@ -1,6 +1,6 @@
 DOCKER_DIR=$(shell basename $(dir $$PWD/.))
 IMAGE = whiterabbitsecurity/openxpki3
-export COMPOSE_PROJECT_NAME=openxpki
+
 
 -include Makefile.local
 
