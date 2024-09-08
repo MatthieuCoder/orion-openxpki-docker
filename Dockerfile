@@ -3,9 +3,6 @@ FROM debian:bookworm
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENXPKI_NOCONFIG=1
 
-RUN groupadd -g 1000 openxpki && \
-    useradd -m -u 1000 -g openxpki openxpki
-
 RUN apt-get update && \
     apt-get upgrade --assume-yes && \
     apt-get install --assume-yes gpg libdbd-mysql-perl libapache2-mod-fcgid apache2 wget locales less gettext curl
@@ -25,10 +22,6 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Hack to run rhel/sles configs in this container
-RUN /usr/bin/id -u www-data | xargs /usr/sbin/useradd apache -s /usr/sbin/nologin -b /var/www -g www-data -o -u
-RUN /usr/bin/id -u www-data | xargs /usr/sbin/useradd wwwrun -s /usr/sbin/nologin -b /var/www -g www-data -o -u
-
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 VOLUME /var/log/openxpki /etc/openxpki
 WORKDIR /var/log/openxpki/
@@ -38,13 +31,11 @@ RUN ln -s /etc/openxpki/contrib/apache2-openxpki-site.conf /etc/apache2/sites-av
 RUN ln -s ../sites-available/openxpki.conf /etc/apache2/sites-enabled/ 
 RUN a2enmod cgid fcgid headers rewrite ssl
 COPY bin/setup-cert.sh /usr/bin/setup-cert
- RUN chmod 555 /usr/bin/setup-cert
+ RUN chmod +x /usr/bin/setup-cert
 COPY bin/start-apache.sh /usr/bin/start-apache
-RUN chmod 555 /usr/bin/start-apache
+RUN chmod +x /usr/bin/start-apache
 COPY bin/update-i18n.sh /usr/bin/update-i18n
-RUN chmod 555 /usr/bin/update-i18n
-RUN chown openxpki:openxpki -R /var/log/apache2/
-USER openxpki
+RUN chmod +x /usr/bin/update-i18n
 
 CMD ["/usr/bin/openxpkictl","start","--no-detach"]
 
